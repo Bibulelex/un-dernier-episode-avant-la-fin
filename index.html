@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Un dernier épisode avant la fin…</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Space+Mono:ital@0;1&display=swap');
+
+  :root {
+    --bg: #020408;
+    --white: #e8edf2;
+    --cyan: #3a7d44;
+    --red: #ff2d55;
+    --dim: #1a2535;
+    --mid: #8899aa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid var(--cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    opacity: 0.5;
+  }
+
+  /* Scanlines overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Noise grain overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: -50%;
+    width: 200%; height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 99;
+    opacity: 0.4;
+    animation: grainMove 0.5s steps(2) infinite;
+  }
+
+  @keyframes grainMove {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(-5px, 3px); }
+    50% { transform: translate(3px, -4px); }
+    75% { transform: translate(-3px, -2px); }
+    100% { transform: translate(0,0); }
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8vw;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animated grid background */
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes gridPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* Vignette */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(2,4,8,0.85) 100%);
+    pointer-events: none;
+  }
+
+  /* Glitch line */
+  .glitch-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--cyan);
+    opacity: 0;
+    animation: glitchLine 6s infinite;
+  }
+
+  @keyframes glitchLine {
+    0%, 90%, 100% { opacity: 0; top: 30%; }
+    91% { opacity: 0.8; top: 30%; height: 2px; }
+    92% { opacity: 0.3; top: 60%; height: 4px; }
+    93% { opacity: 0.9; top: 45%; height: 1px; }
+    94% { opacity: 0; }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+  }
+
+  .tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--cyan);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .tag::before {
+    content: '';
+    display: inline-block;
+    width: 40px;
+    height: 1px;
+    background: var(--cyan);
+  }
+
+  .tag-blink {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: blink 1.2s steps(1) infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(3.5rem, 10vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+    position: relative;
+  }
+
+  h1 .glitch-text {
+    position: relative;
+    display: inline-block;
+  }
+
+  h1 .glitch-text::before,
+  h1 .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  h1 .glitch-text::before {
+    color: var(--cyan);
+    animation: glitchBefore 4s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  }
+
+  h1 .glitch-text::after {
+    color: var(--red);
+    animation: glitchAfter 4s infinite;
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+  }
+
+  @keyframes glitchBefore {
+    0%, 85%, 100% { transform: translate(0); opacity: 0; }
+    86% { transform: translate(-3px, -2px); opacity: 0.8; }
+    88% { transform: translate(3px, 1px); opacity: 0.6; }
+    90% { transform: translate(0); opacity: 0; }
+  }
+
+  @keyframes glitchAfter {
+    0%, 87%, 100% { transform: translate(0); opacity: 0; }
+    88% { transform: translate(4px, 2px); opacity: 0.7; }
+    90% { transform: translate(-2px, -1px); opacity: 0.5; }
+    92% { transform: translate(0); opacity: 0; }
+  }
+
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+    color: var(--mid);
+    margin-top: 2rem;
+    max-width: 520px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .subtitle em {
+    color: var(--cyan);
+    font-style: normal;
+  }
+
+  /* CTA */
+  .cta-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.9rem 2rem;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    background: transparent;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s;
+    display: inline-block;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--cyan);
+    transform: translateX(-101%);
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
+
+  .btn:hover { color: var(--bg); }
+  .btn:hover::before { transform: translateX(0); }
+
+  .btn-ghost {
+    border-color: rgba(136,153,170,0.4);
+    color: var(--mid);
+  }
+  .btn-ghost::before { background: var(--dim); }
+  .btn-ghost:hover { color: var(--white); }
+
+  .episode-counter {
+    font-size: 0.7rem;
+    color: rgba(136,153,170,0.5);
+    letter-spacing: 0.1em;
+  }
+
+  /* ---- ABOUT ---- */
+  .section {
+    padding: 8rem 8vw;
+    position: relative;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,245,255,0.3), transparent);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+  }
+
+  .about-text h2 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+    color: var(--white);
+  }
+
+  .about-text p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 2;
+    color: var(--mid);
+  }
+
+  .about-text p + p { margin-top: 1rem; }
+
+  /* Stats / pills */
+  .stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .stat-item {
+    border: 1px solid var(--dim);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .stat-item:hover { border-color: var(--cyan); }
+
+  .stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--cyan);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .stat-item:hover::before { opacity: 1; }
+
+  .stat-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2.5rem;
+    color: var(--cyan);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    margin-top: 0.3rem;
+  }
+
+  /* ---- THEMES ---- */
+  .themes {
+    background: linear-gradient(180deg, var(--bg) 0%, #020c15 100%);
+    padding: 6rem 8vw;
+  }
+
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--dim);
+    margin-top: 2rem;
+  }
+
+  .theme-item {
+    padding: 2rem 1.5rem;
+    border-right: 1px solid var(--dim);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .theme-item:hover { background: rgba(0,245,255,0.03); }
+
+  .theme-item:last-child { border-right: none; }
+
+  .theme-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    display: block;
+    filter: grayscale(1) brightness(0.7);
+    transition: filter 0.3s;
+  }
+
+  .theme-item:hover .theme-icon { filter: none; }
+
+  .theme-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .theme-desc {
+    font-size: 0.7rem;
+    color: var(--mid);
+    line-height: 1.7;
+  }
+
+  /* ---- NOTIFY ---- */
+  .notify-section {
+    padding: 8rem 8vw;
+    text-align: center;
+    position: relative;
+  }
+
+  .notify-section h2 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    color: var(--white);
+    margin-bottom: 1rem;
+  }
+
+  .notify-section p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--mid);
+    margin-bottom: 3rem;
+    line-height: 1.9;
+  }
+
+  .notify-form {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .notify-input {
+    flex: 1;
+    background: var(--dim);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-right: none;
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 1rem 1.2rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .notify-input::placeholder { color: rgba(136,153,170,0.4); }
+  .notify-input:focus { border-color: var(--cyan); }
+
+  .notify-btn {
+    background: var(--cyan);
+    color: var(--bg);
+    border: 1px solid var(--cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1rem 1.5rem;
+    cursor: none;
+    transition: background 0.3s, color 0.3s;
+    white-space: nowrap;
+  }
+
+  .notify-btn:hover {
+    background: transparent;
+    color: var(--cyan);
+  }
+
+  /* Horizontal rule */
+  .hr {
+    border: none;
+    border-top: 1px solid var(--dim);
+    margin: 0 8vw;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    padding: 3rem 8vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-brand {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    color: rgba(136,153,170,0.5);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .footer-links a {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(136,153,170,0.4);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--cyan); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Podex badge */
+  .podex-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid var(--dim);
+    padding: 0.5rem 1rem;
+    font-size: 0.65rem;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+    transition: border-color 0.3s;
+  }
+
+  .podex-badge:hover { border-color: rgba(136,153,170,0.4); }
+
+  .podex-badge span { color: var(--white); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--dim); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+  /* Glitch horizontal bar animation on load */
+  .hero-bar {
+    position: absolute;
+    bottom: 3rem;
+    left: 8vw;
+    right: 8vw;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 10;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+
+  .hero-bar-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    opacity: 0.3;
+  }
+
+  .hero-bar-text {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: rgba(136,153,170,0.3);
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="vignette"></div>
+  <div class="glitch-line"></div>
+
+  <div class="hero-content">
+    <div class="tag">
+      <span class="tag-blink"></span>
+      Podcast · IA · Condition humaine
+    </div>
+
+    <h1>
+      <span class="glitch-text" data-text="UN DERNIER">UN DERNIER</span><br>
+      <span class="glitch-text" data-text="ÉPISODE">ÉPISODE</span><br>
+      <span style="color: var(--cyan);">AVANT LA FIN…</span>
+    </h1>
+
+    <p class="subtitle">
+      Et si on parlait de ce que l'<em>intelligence artificielle</em> fait à nos vies,<br>
+      à nos cerveaux, à nos liens — avant qu'il soit trop tard<em> ?</em>
+    </p>
+
+    <div class="cta-row">
+      <a href="https://shows.acast.com/podex" class="btn" target="_blank">Écouter Podex</a>
+      <a href="#notify" class="btn btn-ghost">Être notifié·e</a>
+      <span class="episode-counter">// saison 01 en préparation</span>
+    </div>
+
+    <div class="podex-badge">
+      Par les créateurs de <span>Podex</span> — 4 saisons
+    </div>
+  </div>
+
+  <div class="hero-bar">
+    <div class="hero-bar-line"></div>
+    <span class="hero-bar-text">SIGNAL DÉTECTÉ · FRÉQUENCE INCONNUE</span>
+    <div class="hero-bar-line" style="background: linear-gradient(90deg, transparent, var(--cyan));"></div>
+  </div>
+</section>
+
+<hr class="hr">
+
+<!-- ABOUT -->
+<section class="section">
+  <div class="section-label">À propos</div>
+  <div class="about-grid">
+    <div class="about-text">
+      <h2>Ce podcast parle de ce qu'on préfère ne pas regarder en face.</h2>
+      <p>La technologie avance. Nous aussi — mais dans quelle direction ? À chaque épisode, une conversation franche sur l'IA, le numérique et ce qu'ils révèlent de notre humanité.</p>
+      <p>Pas de buzzwords. Pas d'optimisme béat. Juste des questions qui dérangent, posées par quelqu'un qui travaille au quotidien avec des cerveaux humains.</p>
+    </div>
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-num">04</div>
+        <div class="stat-label">Saisons de Podex · podcast précédent</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Questions sans réponse · pour l'instant</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">01</div>
+        <div class="stat-label">Nouvelle saison · bientôt</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THEMES -->
+<section class="themes">
+  <div class="section-label">Thèmes explorés</div>
+  <div class="themes-grid">
+    <div class="theme-item">
+      <span class="theme-icon">🧠</span>
+      <div class="theme-name">Cognition & IA</div>
+      <div class="theme-desc">Ce que les machines apprennent de nos biais, et ce qu'elles nous renvoient.</div>
+    </div>
+    <div class="theme-item">
+      <span class="theme-icon">👁️</span>
+      <div class="theme-name">Surveillance</div>
+      <div class="theme-desc">Qui regarde quoi, pourquoi, et depuis quand on a accepté ça.</div>
+    </div>
+    <div class="theme-item">
+      <span class="theme-icon">🔗</span>
+      <div class="theme-name">Liens humains</div>
+      <div class="theme-desc">Solitude, amour, amitié — à l'ère où les algorithmes connaissent nos patterns.</div>
+    </div>
+    <div class="theme-item">
+      <span class="theme-icon">⚡</span>
+      <div class="theme-name">Ruptures</div>
+      <div class="theme-desc">Les moments de bascule. Avant / après. Ce qu'on ne peut plus désapprendre.</div>
+    </div>
+  </div>
+</section>
+
+<!-- NOTIFY -->
+<section class="notify-section" id="notify">
+  <h2>Ne ratez pas<br>le premier épisode.</h2>
+  <p>Laissez votre email.<br>On vous écrit quand le signal arrive.</p>
+  <div class="notify-form">
+    <input type="email" class="notify-input" placeholder="votre@email.com" />
+    <button class="notify-btn" onclick="handleNotify()">Notifier</button>
+  </div>
+</section>
+
+<hr class="hr">
+
+<footer>
+  <div class="footer-brand">Un dernier épisode avant la fin… © 2025</div>
+  <div class="footer-links">
+    <a href="https://shows.acast.com/podex" target="_blank">Podex</a>
+    <a href="https://www.instagram.com/podexterne" target="_blank">Instagram</a>
+    <a href="https://linktr.ee/podexterne" target="_blank">Linktree</a>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button, input').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(2)';
+      ring.style.width = '60px';
+      ring.style.height = '60px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+    });
+  });
+
+  // Notify handler
+  function handleNotify() {
+    const input = document.querySelector('.notify-input');
+    const btn = document.querySelector('.notify-btn');
+    if (input.value && input.value.includes('@')) {
+      btn.textContent = 'Signal enregistré ✓';
+      btn.style.background = 'var(--cyan)';
+      btn.style.color = 'var(--bg)';
+      input.value = '';
+      input.placeholder = 'On vous écrit bientôt.';
+    } else {
+      input.style.borderColor = 'var(--red)';
+      setTimeout(() => input.style.borderColor = '', 1000);
+    }
+  }
+
+  // Random glitch flicker on title
+  setInterval(() => {
+    if (Math.random() > 0.7) {
+      document.querySelectorAll('.glitch-text').forEach(el => {
+        el.style.transform = `skewX(${(Math.random()-0.5)*2}deg)`;
+        setTimeout(() => el.style.transform = '', 80);
+      });
+    }
+  }, 2000);
+</script>
+</body>
+</html>
